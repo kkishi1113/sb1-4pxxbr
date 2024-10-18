@@ -10,7 +10,13 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 type Message = {
   id: number
   content: string
-  sender: "user" | "bot"
+  senderId: string
+}
+
+type User = {
+  id: string
+  name: string
+  avatar: string
 }
 
 type ChatComponentProps = {
@@ -19,9 +25,12 @@ type ChatComponentProps = {
   chatAvatar: string
   messages: Message[]
   onSendMessage: (content: string) => void
+  currentUserId: string
+  users: User[]
+  participants: string[]
 }
 
-export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMessage }: ChatComponentProps) {
+export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMessage, currentUserId, users, participants }: ChatComponentProps) {
   const [input, setInput] = useState("")
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -39,15 +48,27 @@ export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMe
     }
   }
 
+  const getUserName = (userId: string) => {
+    return users.find(user => user.id === userId)?.name || "Unknown"
+  }
+
+  const getUserAvatar = (userId: string) => {
+    return users.find(user => user.id === userId)?.avatar || "/placeholder.svg?height=40&width=40"
+  }
+
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Avatar>
-            <AvatarImage src={chatAvatar} alt="" />
-            <AvatarFallback>{chatName.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <span>{chatName}</span>
+          <div className="flex items-center">
+            {participants.map(userId => (
+              <Avatar key={userId} className="-ml-2 first:ml-0 border-2 border-background">
+                <AvatarImage src={getUserAvatar(userId)} alt={getUserName(userId)} />
+                <AvatarFallback>{getUserName(userId).slice(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            ))}
+          </div>
+          <span className="ml-2">{chatName}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
@@ -56,17 +77,17 @@ export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMe
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"} mb-4`}
+                className={`flex ${message.senderId === currentUserId ? "justify-end" : "justify-start"} mb-4`}
               >
-                {message.sender === "bot" && (
+                {message.senderId !== currentUserId && (
                   <Avatar className="mr-2">
-                    <AvatarImage src={chatAvatar} alt="" />
-                    <AvatarFallback>{chatName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={getUserAvatar(message.senderId)} alt="" />
+                    <AvatarFallback>{getUserName(message.senderId).slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={`p-2 rounded-lg ${
-                    message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-secondary"
+                    message.senderId === currentUserId ? "bg-primary text-primary-foreground" : "bg-secondary"
                   }`}
                 >
                   {message.content}
