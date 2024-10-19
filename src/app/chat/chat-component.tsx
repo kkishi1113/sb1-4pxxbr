@@ -1,70 +1,96 @@
-import { useState, useRef, useEffect } from "react"
-import { Send } from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import { Send } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Message = {
-  id: number
-  content: string
-  senderId: string
-}
+  id: number;
+  content: string;
+  senderId: string;
+};
 
 type User = {
-  id: string
-  name: string
-  avatar: string
-}
+  id: string;
+  name: string;
+  avatar: string;
+};
 
 type ChatComponentProps = {
-  chatId: string
-  chatName: string
-  chatAvatar: string
-  messages: Message[]
-  onSendMessage: (content: string) => void
-  currentUserId: string
-  users: User[]
-  participants: string[]
-}
+  chatId: string;
+  chatName: string;
+  chatAvatar: string;
+  messages: Message[];
+  onSendMessage: (content: string) => void;
+  currentUserId: string;
+  users: User[];
+  participants: string[];
+};
 
-export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMessage, currentUserId, users, participants }: ChatComponentProps) {
-  const [input, setInput] = useState("")
+export function ChatComponent({
+  // chatId,
+  chatName,
+  // chatAvatar,
+  messages,
+  onSendMessage,
+  currentUserId,
+  users,
+  participants,
+}: ChatComponentProps) {
+  const [input, setInput] = useState("");
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  useEffect(scrollToBottom, [messages])
+  useEffect(scrollToBottom, [messages]);
 
   const handleSend = () => {
     if (input.trim()) {
-      onSendMessage(input)
-      setInput("")
+      onSendMessage(input);
+      setInput("");
     }
-  }
+  };
 
   const getUserName = (userId: string) => {
-    return users.find(user => user.id === userId)?.name || "Unknown"
-  }
+    return users.find((user) => user.id === userId)?.name || "Unknown";
+  };
 
   const getUserAvatar = (userId: string) => {
-    return users.find(user => user.id === userId)?.avatar || "/placeholder.svg?height=40&width=40"
-  }
+    return (
+      users.find((user) => user.id === userId)?.avatar ||
+      "/placeholder.svg?height=40&width=40"
+    );
+  };
 
   return (
-    <Card className="w-full h-full flex flex-col">
+    <Card className="w-full h-full flex flex-col rounded-none">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <div className="flex items-center">
-            {participants.map(userId => (
-              <Avatar key={userId} className="-ml-2 first:ml-0 border-2 border-background">
-                <AvatarImage src={getUserAvatar(userId)} alt={getUserName(userId)} />
-                <AvatarFallback>{getUserName(userId).slice(0, 2).toUpperCase()}</AvatarFallback>
+            {participants.map((userId) => (
+              <Avatar
+                key={userId}
+                className="-ml-2 first:ml-0 border-2 border-background"
+              >
+                <AvatarImage
+                  src={getUserAvatar(userId)}
+                  alt={getUserName(userId)}
+                />
+                <AvatarFallback>
+                  {getUserName(userId).slice(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             ))}
           </div>
@@ -77,17 +103,25 @@ export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMe
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.senderId === currentUserId ? "justify-end" : "justify-start"} mb-4`}
+                className={`flex ${
+                  message.senderId === currentUserId
+                    ? "justify-end"
+                    : "justify-start"
+                } mb-4`}
               >
                 {message.senderId !== currentUserId && (
                   <Avatar className="mr-2">
                     <AvatarImage src={getUserAvatar(message.senderId)} alt="" />
-                    <AvatarFallback>{getUserName(message.senderId).slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {getUserName(message.senderId).slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={`p-2 rounded-lg ${
-                    message.senderId === currentUserId ? "bg-primary text-primary-foreground" : "bg-secondary"
+                    message.senderId === currentUserId
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary"
                   }`}
                 >
                   {message.content}
@@ -101,8 +135,8 @@ export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMe
       <CardFooter>
         <form
           onSubmit={(e) => {
-            e.preventDefault()
-            handleSend()
+            e.preventDefault();
+            handleSend();
           }}
           className="flex w-full items-center space-x-2"
         >
@@ -120,5 +154,5 @@ export function ChatComponent({ chatId, chatName, chatAvatar, messages, onSendMe
         </form>
       </CardFooter>
     </Card>
-  )
+  );
 }
